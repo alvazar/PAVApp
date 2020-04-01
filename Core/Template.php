@@ -9,7 +9,7 @@ class Template
     
     protected function getBlockTemplate(string $name, string $template): string
     {
-        $regexp = "/(\<\!\-\-\s?(b\[{$name}\])\s?\{\s?\-\-\>.+\<\!\-\-\s?\}\s?\g{2}\s?\-\-\>)/us";
+        $regexp = "/(\<\!\-\-\s(b\[{$name}\])\s\{\s\-\-\>.+?\<\!\-\-\s\}\s\g{2}\s\-\-\>)/us";
         preg_match_all($regexp, $template, $match);
         return !empty($match[1][0]) ? $match[1][0] : "";
     }
@@ -76,7 +76,7 @@ class Template
 
     public function skipTemplateTags(string $content): string
     {
-        $regexp = "/\<\!\-\-(\s?\}|)\s?[bv]\[[^\]]+\]\s?(\{\s?|)\-\-\>/us";
+        $regexp = "/\<\!\-\-(\s\}|)\s[bv]\[[^\]]+\]\s(\{\s|)\-\-\>/us";
         return preg_replace($regexp, "", $content);
     }
 

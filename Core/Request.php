@@ -29,7 +29,7 @@ class Request implements RequestInterface
     {
         $query = $this->getQuery();
         $param = preg_quote($param, '/');
-        $param = preg_replace("/\\\{([^\}]+)\\\}/u", "(?<\$1>[^&\/]+)", $param);
+        $param = preg_replace("/\\\{(.+?)\\\}/u", "(?<\$1>[^&\/]+)", $param);
         preg_match('/^'.$param.'$/u', $query, $match);
         $match = !empty($match) ? $match : [];
         $queryVars = [];
@@ -45,7 +45,7 @@ class Request implements RequestInterface
     {
         $query = $this->getQuery();
         $param = preg_quote($param, '/');
-        $param = preg_replace("/\\\{([^\}]+)\\\}/u", "[^&\/]+", $param);
+        $param = preg_replace("/\\\{(.+?)\\\}/u", "[^&\/]+", $param);
         return preg_match('/^'.$param.'$/u', $query) === 1;
     }
 }
