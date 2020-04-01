@@ -76,7 +76,7 @@ class Template
 
     public function skipTemplateTags(string $content): string
     {
-        $regexp = "/\<\!\-\-(\s\}|)\s[bv]\[[^\]]+\]\s(\{\s|)\-\-\>/us";
+        $regexp = "/\<\!\-\-(\s\}|)\s[bv]\[.+?\]\s(\{\s|)\-\-\>/us";
         return preg_replace($regexp, "", $content);
     }
 
