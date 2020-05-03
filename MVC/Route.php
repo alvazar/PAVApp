@@ -13,7 +13,7 @@ class Route implements RouteInterface
     public static function run(string $cb, array $params = []): ResultInterface
     {
         if (preg_match("/\./u", $cb) === 1) {
-            list($cl, $mt) = explode('.', $cb);
+            [$cl, $mt] = explode('.', $cb);
             return (new $cl($params))->$mt();
         }
         return $cb($params);
@@ -64,15 +64,5 @@ class Route implements RouteInterface
     {
         header("Location: ".$url);
         exit;
-    }
-
-    public static function error(string $message = ""): ResultInterface
-    {
-        return self::run(
-            'App\Controllers\ControllerPage.actionDefault', [
-                'page' => 'error',
-                'message' => $message
-            ]
-        );
     }
 }
