@@ -31,13 +31,13 @@ class Template
         return $template;
     }
     
-    protected function blockReplace(string $name, array $data, string $template): string
+    protected function blockReplace(string $name, ?array $data, string $template): string
     {
         $blockTemplate = $this->getBlockTemplate($name, $template);
         $blockMaked = $blockTemplate;
         
         // remove block
-        if ($data === false) {
+        if ($data === null) {
             return str_replace($blockMaked, "", $template);
         }
         
