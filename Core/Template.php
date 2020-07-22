@@ -53,7 +53,7 @@ class Template
             }
         } else {
             foreach ($data as $key => $value) {
-                if (is_array($value) || $value === false) {
+                if (is_array($value) || $value === null) {
                     // prepare sub block
                     $blockMaked = $this->blockReplace($key, $value, $blockMaked);
                 } else {
