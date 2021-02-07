@@ -9,17 +9,17 @@
     ],
     "require": {
         "php": ">=7.0.0",
-        
+        "pavapp/validator": "dev-master",
         "pavapp/template": "dev-master"
     },
-    "repositories":[
+    "repositories": [
         {
-            "type":"git",
-            "url":"https://github.com/alvazar/validator.git"
+            "type": "git",
+            "url": "https://github.com/alvazar/validator.git"
         },
         {
-            "type":"git",
-            "url":"https://github.com/alvazar/template.git"
+            "type": "git",
+            "url": "https://github.com/alvazar/template.git"
         }
     ],
     "require-dev": {
