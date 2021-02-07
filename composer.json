@@ -9,8 +9,8 @@
     ],
     "require": {
         "php": ">=7.0.0",
-        "pavapp/validator":"dev-master",
-        "pavapp/template":"dev-master"
+        
+        "pavapp/template": "dev-master"
     },
     "repositories":[
         {
