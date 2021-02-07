@@ -1,0 +1,22 @@
+{
+    "name": "pavapp/framework",
+    "description": "Simple PHP framework",
+    "authors": [
+        {
+            "name": "PAVApp",
+            "email": "alvazar@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0"
+    },
+    "require-dev": {
+
+    },
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "PAVApp\\": "src/PAVApp"
+        }
+    }
+}
