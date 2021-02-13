@@ -3,6 +3,13 @@ namespace PAVApp\Core;
 
 class Request implements RequestInterface
 {
+    private $rootDir;
+
+    public function __construct(string $rootDir)
+    {
+        $this->rootDir = $rootDir ?? '';
+    }
+
     public function type(): string
     {
         return $_SERVER['REQUEST_METHOD'];
@@ -22,7 +29,7 @@ class Request implements RequestInterface
 
     public function getQuery(): string
     {
-        return $_SERVER['REQUEST_URI'];
+        return $this->rootDir.$_SERVER['REQUEST_URI'];
     }
 
     public function getVars(string $param): array

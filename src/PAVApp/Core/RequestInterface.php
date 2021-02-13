@@ -3,6 +3,7 @@ namespace PAVApp\Core;
 
 interface RequestInterface
 {
+    public function __construct(string $rootDir): object;
     public function type(): string;
     public function getData(): array;
     public function getQuery(): string;
