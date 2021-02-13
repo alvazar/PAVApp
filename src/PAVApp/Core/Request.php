@@ -5,9 +5,9 @@ class Request implements RequestInterface
 {
     private $rootDir;
 
-    public function __construct(string $rootDir)
+    public function __construct(string $rootDir = '')
     {
-        $this->rootDir = $rootDir ?? '';
+        $this->rootDir = $rootDir;
     }
 
     public function type(): string
