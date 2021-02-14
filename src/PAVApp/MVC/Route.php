@@ -10,7 +10,7 @@ class Route implements RouteInterface
     private static $getCB = [];
     private static $postCB = [];
 
-    public static function run(mixed $cb, array $params = []): ResultInterface
+    public static function run($cb, array $params = []): ResultInterface
     {
         if (is_string($cb) && preg_match("/\./u", $cb) === 1) {
             [$cl, $mt] = explode('.', $cb);
@@ -19,7 +19,7 @@ class Route implements RouteInterface
         return $cb($params);
     }
 
-    public static function get(string $queryTrigger, mixed $cb, array $params = []): void
+    public static function get(string $queryTrigger, $cb, array $params = []): void
     {
         $triggers = explode(',', $queryTrigger);
         foreach ($triggers as $trigger) {
@@ -28,7 +28,7 @@ class Route implements RouteInterface
         }
     }
 
-    public static function post(string $queryTrigger, mixed $cb, array $params = []): void
+    public static function post(string $queryTrigger, $cb, array $params = []): void
     {
         $triggers = explode(',', $queryTrigger);
         foreach ($triggers as $trigger) {
