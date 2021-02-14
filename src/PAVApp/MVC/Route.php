@@ -10,9 +10,9 @@ class Route implements RouteInterface
     private static $getCB = [];
     private static $postCB = [];
 
-    public static function run(string $cb, array $params = []): ResultInterface
+    public static function run(mixed $cb, array $params = []): ResultInterface
     {
-        if (preg_match("/\./u", $cb) === 1) {
+        if (is_string($cb) && preg_match("/\./u", $cb) === 1) {
             [$cl, $mt] = explode('.', $cb);
             return (new $cl($params))->$mt();
         }
