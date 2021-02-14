@@ -19,7 +19,7 @@ class Route implements RouteInterface
         return $cb($params);
     }
 
-    public static function get(string $queryTrigger, string $cb, array $params = []): void
+    public static function get(string $queryTrigger, mixed $cb, array $params = []): void
     {
         $triggers = explode(',', $queryTrigger);
         foreach ($triggers as $trigger) {
@@ -28,7 +28,7 @@ class Route implements RouteInterface
         }
     }
 
-    public static function post(string $queryTrigger, string $cb, array $params = []): void
+    public static function post(string $queryTrigger, mixed $cb, array $params = []): void
     {
         $triggers = explode(',', $queryTrigger);
         foreach ($triggers as $trigger) {
