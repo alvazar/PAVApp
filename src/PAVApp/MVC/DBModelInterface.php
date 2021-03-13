@@ -12,5 +12,6 @@ interface DBModelInterface
     public function getByID(int $ID): array;
     public function delete(int $ID): bool;
     //public function getError(): string;
+    public function init(): void;
 
 }

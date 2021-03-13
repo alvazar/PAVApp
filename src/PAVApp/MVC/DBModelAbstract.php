@@ -47,6 +47,14 @@ abstract class DBModelAbstract implements DBModelInterface
     {
         $this->QueryHelper = new DBQueryHelper();
         $this->DB = DBStorage::getInstance();
+        $this->init();
+    }
+
+    /** Инициализирует свойства модели
+     * @return void
+     */
+    public function init(): void
+    {
     }
 
     /**
