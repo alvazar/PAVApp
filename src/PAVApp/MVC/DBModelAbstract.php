@@ -198,7 +198,10 @@ abstract class DBModelAbstract implements DBModelInterface
                 if ($stmt !== false) {
                     if ($stmt->execute($prepared['values'])) {
                         $stmt->setFetchMode(\PDO::FETCH_ASSOC);
-                        $result = $stmt;
+                        $result = (object) [
+                            'stmt' => $stmt,
+                            'prepared' => $prepared
+                        ];
                     }
                 }
             }

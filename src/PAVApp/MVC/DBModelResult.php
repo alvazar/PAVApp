@@ -29,7 +29,7 @@ class DBModelResult implements DBModelResultInterface
 
     public function result(): object
     {
-        return $this->result;
+        return $this->result->stmt;
     }
 
     /**
@@ -51,13 +51,16 @@ class DBModelResult implements DBModelResultInterface
         
         if (!empty($this->result)) {
             $DB = DBStorage::getInstance();
+            $prepared = $this->result->prepared;
             $qu = sprintf(
-                'SELECT COUNT(0) AS rowCount FROM (%s)',
-                $this->result->queryString
+                'SELECT COUNT(0) AS rowCount FROM (%s) as t1',
+                $prepared['prepareSQL']
             );
-            $stmt = $DB->query($qu);
-            $stmt->setFetchMode(\PDO::FETCH_ASSOC);
-            $rowCount = (int) $stmt->fetch()['rowCount'];
+            $stmt = $DB->prepare($qu);
+            if ($stmt->execute($prepared['values'])) {
+                $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+                $rowCount = (int) $stmt->fetch()['rowCount'];
+            }
         }
         
         return $rowCount;
