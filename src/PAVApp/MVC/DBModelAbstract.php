@@ -116,44 +116,18 @@ abstract class DBModelAbstract implements DBModelInterface
      */
     public function getList(array $params = []): array
     {
-        $queryMap = [
-            'type' => 'select',
-            'table' => $this->table,
-            'where' => $this->whereFields
-        ];
-
         $result = [];
-
-        $queryData = $params ?? [];
-        $queryData['where'] = $queryData['where'] ?? [];
-
         try {
-            $prepared = $this->QueryHelper->prepareToSQL(
-                $queryMap,
-                $queryData
-            );
 
-            if (count($prepared['errors']) > 0) {
-                return $result;
-            }
-    
-            $stmt = $this->DB->prepare($prepared['prepareSQL']);
-            if ($stmt !== false) {
-                if ($stmt->execute($prepared['values'])) {
-                    $stmt->setFetchMode(\PDO::FETCH_ASSOC);
-                    while ($item = $stmt->fetch()) {
-                        if (
-                            !empty($params['prepareItem'])
-                            && is_callable($params['prepareItem'])
-                        ) {
-                            $item = $params['prepareItem']($item);
-                        }
-                        $result[] = $item;
-                    }
+            $resultQuery = $this->querySelect($params);
+            if ($resultQuery->success()) {
+                $resultQuery = $resultQuery->result();
+                while ($item = $resultQuery->fetch()) {
+                    $result[] = $item;
                 }
             }
-        } catch (Throwable $err) {
-        }
+
+        } catch (Throwable $err) {}
 
         return $result;
     }
@@ -192,5 +166,59 @@ abstract class DBModelAbstract implements DBModelInterface
             $ID
         );
         return $this->db->query($qu);
+    }
+
+    /**
+     * Делает запрос select и возвращает объект DBModelResultInterface
+     * @param array $params
+     * 
+     * @return DBModelResultInterface
+     */
+    public function querySelect(array $params = []): DBModelResultInterface
+    {
+        $queryMap = [
+            'type' => 'select',
+            'table' => $this->table,
+            'where' => $this->whereFields
+        ];
+
+        $result = null;
+
+        $queryData = $params ?? [];
+        $queryData['where'] = $queryData['where'] ?? [];
+
+        try {
+            $prepared = $this->QueryHelper->prepareToSQL(
+                $queryMap,
+                $queryData
+            );
+
+            if (count($prepared['errors']) === 0) {
+                $stmt = $this->DB->prepare($prepared['prepareSQL']);
+                if ($stmt !== false) {
+                    if ($stmt->execute($prepared['values'])) {
+                        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+                        $result = $stmt;
+                    }
+                }
+            }
+        } catch (Throwable $err) {}
+
+        return new DBModelResult($result);
+    }
+
+    public function getTable(): string
+    {
+        return $this->table;
+    }
+
+    public function getWhereFields(): array
+    {
+        return $this->whereFields;
+    }
+
+    public function getSaveFields(): array
+    {
+        return $this->saveFields;
     }
 }

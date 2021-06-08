@@ -34,14 +34,15 @@ class DBQueryHelper
         
         // Шаблоны sql запросов.
         $queryTempl = [
-            'select' => 'SELECT {selectNames} FROM {table} {where} {groupBy} {orderBy} {limit}',
+            'select' => 'SELECT {selectNames} FROM {table} {join} {where} {groupBy} {orderBy} {limit}',
             'insert' => 'INSERT INTO {table} ({insertNames}) VALUES ({values})',
             'update' => 'UPDATE {table} SET {updates} {where} {limit}',
         ];
         // Части запроса.
         $queryData = [
             'table' => $params['table'] ?? '',
-            'selectNames' => !empty($params['select']) ? implode(',', $params['select']) : '*',
+            'join' => '',
+            'selectNames' => !empty($data['select']) ? implode(',', $data['select']) : '*',
             'insertNames' => '',
             'updates' => '',
             'values' => '',
@@ -50,6 +51,47 @@ class DBQueryHelper
             'orderBy' => '',
             'limit' => ''
         ];
+
+        //
+        $fnAddPrefix = function (array $data, string $prefix): array {
+            $result = [];
+            foreach ($data as $key => $value) {
+                $result[$prefix.$key] = $value;
+            }
+            return $result;
+        };
+
+        if (!empty($data['as'])) {
+            $queryData['table'] .= sprintf(' %s', $data['as']);
+            $params['where'] = $fnAddPrefix($params['where'], $data['as'].'.');
+        }
+
+        // joins
+        if (!empty($data['join'])) {
+            foreach ($data['join'] as $modelName => $joinData) {
+                
+                $ModelObj = new $modelName;
+                $modelTable = $ModelObj->getTable();
+                $modelWhereFields = $ModelObj->getWhereFields();
+
+                $queryData['join'] .= sprintf("\n LEFT JOIN %s", $modelTable);
+
+                if (!empty($joinData['as'])) {
+                    $queryData['join'] .= ' '.$joinData['as'];
+                    $modelWhereFields = $fnAddPrefix($modelWhereFields, $joinData['as'].'.');
+                    $params['where'] = array_merge($params['where'], $modelWhereFields);
+                }
+
+                if (!empty($joinData['on'])) {
+                    $queryData['join'] .= ' ON ';
+                    foreach ($joinData['on'] as $joinOnData) {
+                        $queryData['join'] .= sprintf(' %s = %s ', $joinOnData[0], $joinOnData[1]);
+                    }
+                }
+
+                $queryData['join'] .= " \n";
+            }
+        }
 
         // Валидатор
         $Validator = $this->Validator;
@@ -110,11 +152,65 @@ class DBQueryHelper
                                 ? sprintf('%s LIKE ? AND ', $name)
                                 : sprintf('%s = ? AND ', $name);
                         }
+                    } elseif (is_int($name)) {
+                        // sql разметка
+                        if (
+                            is_string($value)
+                            // проверяем на допустимые символы
+                            && in_array($value = mb_strtoupper($value), [
+                                '(', ')', 'OR', 'AND'
+                            ])
+                        ) {
+                            if (in_array($value, ['OR', ')'])) {
+                                if (mb_substr($queryData['where'], -5) === ' AND ') {
+                                    $queryData['where'] = mb_substr($queryData['where'], 0, -5);
+                                }
+                            }
+                            $queryData['where'] .= sprintf(' %s ', $value);
+                            if (in_array($value, [')'])) {
+                                $queryData['where'] .= ' AND ';
+                            }
+                        
+                        // сравнение полей
+                        } elseif (is_array($value)) {
+                            $countParams = count($value);
+                            if ($countParams === 2) {
+                                [$fieldName, $fieldValue] = $value;
+                                $expression = '=';
+                            } elseif ($countParams === 3) {
+                                [$fieldName, $expression, $fieldValue] = $value;
+                            }
+                            
+                            $checkData = [$fieldName => $fieldValue];
+                            if (!$Validator->check($params['where'], $checkData)->hasError()) {
+                                if (is_array($fieldValue)) {
+                                    $result['types'] .= str_repeat('s', count($fieldValue));
+                                    $result['values'] = array_merge($result['values'], $fieldValue);
+                                    $queryData['where'] .= sprintf(
+                                        '%s %s (%s) AND ',
+                                        $fieldName,
+                                        $expression,
+                                        str_repeat('?,', count($fieldValue) - 1).'?'
+                                    );
+                                } else {
+                                    $result['types'] .= 's';
+                                    $result['values'][] = $fieldValue;
+                                    $queryData['where'] .= sprintf(
+                                        '%s %s ? AND ',
+                                        $fieldName,
+                                        $expression
+                                    );
+                                }
+                            }
+                        }
                     }
                 }
             }
 
-            if ($queryData['where'] !== '') {
+            if (
+                $queryData['where'] !== '' 
+                && mb_substr($queryData['where'], -5) === ' AND '
+            ) {
                 $queryData['where'] = 'WHERE '.mb_substr($queryData['where'], 0, -5);
             }
         }

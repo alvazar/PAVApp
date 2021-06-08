@@ -13,5 +13,9 @@ interface DBModelInterface
     public function delete(int $ID): bool;
     //public function getError(): string;
     public function init(): void;
+    public function querySelect(array $params): DBModelResultInterface;
+    public function getTable(): string;
+    public function getWhereFields(): array;
+    public function getSaveFields(): array;
 
 }
