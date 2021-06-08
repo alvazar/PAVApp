@@ -52,8 +52,9 @@ class DBModelResult implements DBModelResultInterface
         if (!empty($this->result)) {
             $DB = DBStorage::getInstance();
             $prepared = $this->result->prepared;
-            $qu = sprintf(
-                'SELECT COUNT(0) AS rowCount FROM (%s) as t1',
+            $qu = preg_replace(
+                '/^SELECT (.+?) FROM/i',
+                'SELECT COUNT(0) AS rowCount FROM',
                 $prepared['prepareSQL']
             );
             $stmt = $DB->prepare($qu);
