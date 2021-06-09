@@ -52,10 +52,16 @@ class DBModelResult implements DBModelResultInterface
         if (!empty($this->result)) {
             $DB = DBStorage::getInstance();
             $prepared = $this->result->prepared;
+            // remove columns list
             $qu = preg_replace(
                 '/^SELECT (.+?) FROM/i',
-                'SELECT COUNT(0) AS rowCount FROM',
+                'SELECT 0 FROM',
                 $prepared['prepareSQL']
+            );
+            // calculate count rows _after_ query exec (need if query has group by)
+            $qu = sprintf(
+                'SELECT COUNT(*) AS rowCount FROM (%s) AS t1',
+                $qu
             );
             $stmt = $DB->prepare($qu);
             if ($stmt->execute($prepared['values'])) {
