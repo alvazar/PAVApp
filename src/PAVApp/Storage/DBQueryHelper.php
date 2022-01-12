@@ -85,8 +85,9 @@ class DBQueryHelper
                 if (!empty($joinData['on'])) {
                     $queryData['join'] .= ' ON ';
                     foreach ($joinData['on'] as $joinOnData) {
-                        $queryData['join'] .= sprintf(' %s = %s ', $joinOnData[0], $joinOnData[1]);
+                        $queryData['join'] .= sprintf(' %s = %s AND ', $joinOnData[0], $joinOnData[1]);
                     }
+                    $queryData['join'] = mb_substr($queryData['join'], 0, -5);
                 }
 
                 $queryData['join'] .= " \n";
@@ -144,7 +145,8 @@ class DBQueryHelper
                             $result['values'][] = $value;
                             $result['types'] .= $type;
                             $queryData['where'] .= (
-                                    is_string($value) && (
+                                    (is_string($value) && mb_strlen($value) > 1) 
+                                    && (
                                         $value[0] === '%' 
                                         || $value[-1] === '%'
                                     )
@@ -191,6 +193,12 @@ class DBQueryHelper
                                         $fieldName,
                                         $expression,
                                         str_repeat('?,', count($fieldValue) - 1).'?'
+                                    );
+                                } elseif (is_null($fieldValue)) {
+                                    $queryData['where'] .= sprintf(
+                                        '%s %s NULL AND ',
+                                        $fieldName,
+                                        $expression
                                     );
                                 } else {
                                     $result['types'] .= 's';
