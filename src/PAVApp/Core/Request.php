@@ -29,7 +29,7 @@ class Request implements RequestInterface
 
     public function getQuery(): string
     {
-        return $this->rootDir.$_SERVER['REQUEST_URI'];
+        return preg_replace('/\?.+/', '', $this->rootDir.$_SERVER['REQUEST_URI']);
     }
 
     public function getVars(string $param): array
