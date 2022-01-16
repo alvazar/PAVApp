@@ -165,7 +165,7 @@ abstract class DBModelAbstract implements DBModelInterface
             $this->idName,
             $ID
         );
-        return $this->db->query($qu);
+        return $this->DB->query($qu);
     }
 
     /**
@@ -223,5 +223,10 @@ abstract class DBModelAbstract implements DBModelInterface
     public function getSaveFields(): array
     {
         return $this->saveFields;
+    }
+
+    public function getInsertID(): int
+    {
+        return $this->DB->lastInsertId();
     }
 }

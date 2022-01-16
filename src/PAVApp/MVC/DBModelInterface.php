@@ -17,5 +17,6 @@ interface DBModelInterface
     public function getTable(): string;
     public function getWhereFields(): array;
     public function getSaveFields(): array;
+    public function getInsertID(): int;
 
 }
