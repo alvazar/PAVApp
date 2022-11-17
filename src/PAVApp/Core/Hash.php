@@ -33,6 +33,7 @@ class Hash
     {
         // salt
         $salt = "";
+
         if (preg_match("/\_/u", $hash) === 1) {
             $salt = preg_replace("/.+\_/u", "", $hash);
         }
@@ -43,6 +44,7 @@ class Hash
         
         // check lifetime
         $timeCheck = true;
+
         if (preg_match("/\:/u", $hash) === 1) {
             $timeEnd = $this->getTime($hash);
             $repairHash = $this->encodeTime($repairHash, $timeEnd);
@@ -59,13 +61,17 @@ class Hash
     private function prepareHash(array $params, string $salt = ""): string
     {
         $result = "";
+
         foreach ($params as $key => $value) {
             $result .= sprintf("%s=%s_", $key, $value);
         }
+
         $result .= $this->key;
+
         if ($salt !== "") {
             $result .= sprintf("_%s", (string) $salt);
         }
+
         return $result;
     }
     
@@ -75,10 +81,13 @@ class Hash
         $encodeHash = "";
         
         $timeLength = mb_strlen($timeEnd);
+
         for ($i = 0; $i < $timeLength; $i += 1) {
             $encodeHash .= $hash[$i].$timeEnd[$i];
         }
+
         $encodeHash .= ":".mb_substr($hash, $timeLength);
+
         return $encodeHash;
     }
     
@@ -87,6 +96,7 @@ class Hash
         $result = "";
         list($encodeHash, $hashEnd) = explode(":",$hash);
         $length = mb_strlen($encodeHash);
+
         for ($i = 1; $i < $length; $i += 2) {
             $result .= $encodeHash[$i];
         }

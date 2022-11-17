@@ -15,8 +15,9 @@ class MCStorage implements StorageInterface
     {
         if (self::$instance === null) {
             self::$instance = new \Memcache();
-            self::$instance->connect(StorageConfig::MC_HOST,StorageConfig::MC_PORT);
+            self::$instance->connect(StorageConfig::MC_HOST, StorageConfig::MC_PORT);
         }
+
         return self::$instance;
     }
 }

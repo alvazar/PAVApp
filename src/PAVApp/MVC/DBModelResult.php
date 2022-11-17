@@ -17,13 +17,17 @@ class DBModelResult implements DBModelResultInterface
 
     public function getList(): array
     {
-        $result = [];
-        if ($this->success()) {
-            $res = $this->result();
-            while ($item = $res->fetch()) {
-                $result[] = $item;
-            }
+        if (!$this->success()) {
+            return [];
         }
+
+        $result = [];
+        $queryResult = $this->result();
+
+        while ($item = $queryResult->fetch()) {
+            $result[] = $item;
+        }
+        
         return $result;
     }
 
@@ -49,25 +53,30 @@ class DBModelResult implements DBModelResultInterface
     {
         $rowCount = 0;
         
-        if (!empty($this->result)) {
-            $DB = DBStorage::getInstance();
-            $prepared = $this->result->prepared;
-            // remove columns list
-            $qu = preg_replace(
-                '/^SELECT (.+?) FROM/i',
-                'SELECT 0 FROM',
-                $prepared['prepareSQL']
-            );
-            // calculate count rows _after_ query exec (need if query has group by)
-            $qu = sprintf(
-                'SELECT COUNT(*) AS rowCount FROM (%s) AS t1',
-                $qu
-            );
-            $stmt = $DB->prepare($qu);
-            if ($stmt->execute($prepared['values'])) {
-                $stmt->setFetchMode(\PDO::FETCH_ASSOC);
-                $rowCount = (int) $stmt->fetch()['rowCount'];
-            }
+        if (empty($this->result)) {
+            return $rowCount;
+        }
+        
+        $DB = DBStorage::getInstance();
+        $prepared = $this->result->prepared;
+        
+        // remove columns list
+        $qu = preg_replace(
+            '/^SELECT (.+?) FROM/i',
+            'SELECT 0 FROM',
+            $prepared['prepareSQL']
+        );
+
+        // calculate count rows _after_ query exec (need if query has group by)
+        $qu = sprintf(
+            'SELECT COUNT(*) AS rowCount FROM (%s) AS t1',
+            $qu
+        );
+        $stmt = $DB->prepare($qu);
+
+        if ($stmt->execute($prepared['values'])) {
+            $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+            $rowCount = (int) $stmt->fetch()['rowCount'];
         }
         
         return $rowCount;

@@ -72,9 +72,11 @@ abstract class DBModelAbstract implements DBModelInterface
         
         if (!empty($queryData['where'])) {
             $queryType = 'update';
+
             if (!empty($queryData['where'][$this->idName])) {
                 $queryData['limit'] = 1;
             }
+
         } else {
             $queryType = 'insert';
         }
@@ -98,6 +100,7 @@ abstract class DBModelAbstract implements DBModelInterface
             
             $stmt = $this->DB->prepare($prepared['prepareSQL']);
             $result = false;
+
             if ($stmt !== false) {
                 $result = $stmt->execute($prepared['values']);
             }
@@ -117,14 +120,19 @@ abstract class DBModelAbstract implements DBModelInterface
     public function getList(array $params = []): array
     {
         $result = [];
+
         try {
 
             $resultQuery = $this->querySelect($params);
-            if ($resultQuery->success()) {
-                $resultQuery = $resultQuery->result();
-                while ($item = $resultQuery->fetch()) {
-                    $result[] = $item;
-                }
+
+            if (!$resultQuery->success()) {
+                return [];
+            }
+
+            $resultQuery = $resultQuery->result();
+
+            while ($item = $resultQuery->fetch()) {
+                $result[] = $item;
             }
 
         } catch (Throwable $err) {}
@@ -133,38 +141,41 @@ abstract class DBModelAbstract implements DBModelInterface
     }
 
     /**
-     * Возвращает данные модели по ID.
+     * Возвращает данные модели по id.
      * @return array
      */
-    public function getByID(int $ID): array
+    public function getById(int $id): array
     {
-        if (!empty($ID) > 0) {
-            return $this->getList([
-                'where' => [
-                    $this->idName => $ID
-                ]
-            ])[0] ?? [];
+        if ($id <= 0) {
+            return [];
         }
-        return [];
+
+        return $this->getList([
+            'where' => [
+                $this->idName => $id
+            ]
+        ])[0] ?? [];
     }
 
     /**
-     * Удаляет элемент по ID.
-     * @param int $ID
+     * Удаляет элемент по id.
+     * @param int $id
      * 
      * @return bool
      */
-    public function delete(int $ID): bool
+    public function delete(int $id): bool
     {
-        if (empty($ID)) {
+        if (empty($id)) {
             return false;
         }
+
         $qu = sprintf(
             'DELETE FROM %s WHERE %s = %d LIMIT 1',
             $this->table,
             $this->idName,
-            $ID
+            $id
         );
+
         return $this->DB->query($qu);
     }
 
@@ -193,17 +204,18 @@ abstract class DBModelAbstract implements DBModelInterface
                 $queryData
             );
 
-            if (count($prepared['errors']) === 0) {
-                $stmt = $this->DB->prepare($prepared['prepareSQL']);
-                if ($stmt !== false) {
-                    if ($stmt->execute($prepared['values'])) {
-                        $stmt->setFetchMode(\PDO::FETCH_ASSOC);
-                        $result = (object) [
-                            'stmt' => $stmt,
-                            'prepared' => $prepared
-                        ];
-                    }
-                }
+            if (count($prepared['errors']) !== 0) {
+                return new DBModelResult($result);
+            }
+
+            $stmt = $this->DB->prepare($prepared['prepareSQL']);
+
+            if ($stmt !== false && $stmt->execute($prepared['values'])) {
+                $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+                $result = (object) [
+                    'stmt' => $stmt,
+                    'prepared' => $prepared
+                ];
             }
         } catch (Throwable $err) {}
 
@@ -225,7 +237,7 @@ abstract class DBModelAbstract implements DBModelInterface
         return $this->saveFields;
     }
 
-    public function getInsertID(): int
+    public function getInsertId(): int
     {
         return $this->DB->lastInsertId();
     }

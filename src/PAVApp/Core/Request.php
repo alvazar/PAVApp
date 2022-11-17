@@ -19,11 +19,13 @@ class Request implements RequestInterface
     {
         $type = $this->type();
         $data = [];
+
         if ($type === 'GET') {
             $data = $_GET;
         } elseif ($type === 'POST') {
             $data = $_POST;
         }
+
         return $data;
     }
 
@@ -40,11 +42,15 @@ class Request implements RequestInterface
         preg_match('/^'.$param.'$/u', $query, $match);
         $match = !empty($match) ? $match : [];
         $queryVars = [];
+
         foreach ($match as $key => $value) {
+
             if (!is_numeric($key)) {
                 $queryVars[$key] = $value;
             }
+
         }
+
         return $queryVars;
     }
 
@@ -53,6 +59,7 @@ class Request implements RequestInterface
         $query = $this->getQuery();
         $param = preg_quote($param, '/');
         $param = preg_replace("/\\\{(.+?)\\\}/u", "[^&\/]+", $param);
+
         return preg_match('/^'.$param.'$/u', $query) === 1;
     }
 }

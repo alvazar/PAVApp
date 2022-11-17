@@ -6,28 +6,31 @@ use PAVApp\Core\ResultInterface;
 abstract class ControllerAbstract implements ControllerInterface
 {
     protected $params;
-    protected $Model;
-    protected $View;
+    protected $model;
+    protected $view;
 
     public function __construct(array $params = [])
     {
         $this->params = $params;
-        $this->Model = $this->getModel();
-        $this->View = $this->getView();
+        $this->model = $this->getModel();
+        $this->view = $this->getView();
     }
 
     public function actionDefault(): ResultInterface
     {
         $params = $this->getParams();
-        $Result = null;
-        if (is_object($this->Model)) {
-            $Result = $this->Model->apply($params);
-            $params = $Result->getData(); // set model result as view component params
+        $result = null;
+
+        if (is_object($this->model)) {
+            $result = $this->model->apply($params);
+            $params = $result->getData(); // set model result as view component params
         }
-        if (is_object($this->View)) {
-            $Result = $this->View->generate($params);
+
+        if (is_object($this->view)) {
+            $result = $this->view->generate($params);
         }
-        return $Result;
+
+        return $result;
     }
 
     protected function getModel(): ?ModelInterface

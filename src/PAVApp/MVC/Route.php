@@ -14,14 +14,17 @@ class Route implements RouteInterface
     {
         if (is_string($cb) && preg_match("/\./u", $cb) === 1) {
             [$cl, $mt] = explode('.', $cb);
+
             return (new $cl($params))->$mt();
         }
+
         return $cb($params);
     }
 
     public static function get(string $queryTrigger, $cb, array $params = []): void
     {
         $triggers = explode(',', $queryTrigger);
+
         foreach ($triggers as $trigger) {
             $trigger = trim($trigger);
             self::$getCB[$trigger] = [$cb, $params];
@@ -31,6 +34,7 @@ class Route implements RouteInterface
     public static function post(string $queryTrigger, $cb, array $params = []): void
     {
         $triggers = explode(',', $queryTrigger);
+
         foreach ($triggers as $trigger) {
             $trigger = trim($trigger);
             self::$postCB[$trigger] = [$cb, $params];
@@ -40,29 +44,36 @@ class Route implements RouteInterface
     public static function start(RequestInterface $Req): void
     {
         $lst = [];
+
         if ($Req->type() === 'GET') {
             $lst = self::$getCB;
         } elseif ($Req->type() === 'POST') {
             $lst = self::$postCB;
         }
+
         foreach ($lst as $queryTrigger => $item) {
-            if ($Req->hasParam($queryTrigger)) {
-                $Result = self::run(
-                    $item[0],
-                    $item[1] + $Req->getVars($queryTrigger) + $Req->getData()
-                );
-                $data = $Result->getData();
-                if (isset($data['output'])) {
-                    print $data['output'];
-                }
-                break;
+
+            if (!$Req->hasParam($queryTrigger)) {
+                continue;
             }
+
+            $Result = self::run(
+                $item[0],
+                $item[1] + $Req->getVars($queryTrigger) + $Req->getData()
+            );
+            $data = $Result->getData();
+            
+            if (isset($data['output'])) {
+                print $data['output'];
+            }
+
+            break;
         }
     }
 
-    public static function redirect(string $url = ""): void
+    public static function redirect(string $url = ''): void
     {
-        header("Location: ".$url);
+        header("Location: " . $url);
         exit;
     }
 }
