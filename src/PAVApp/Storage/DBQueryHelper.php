@@ -25,9 +25,9 @@ class DBQueryHelper
 
         // Части запроса.
         $this->queryData = [
-            'table' => $params['table'] ?? '',
+            'table' => '',
             'join' => '',
-            'selectNames' => !empty($data['select']) ? implode(',', $data['select']) : '*',
+            'selectNames' => '',
             'insertNames' => '',
             'updates' => '',
             'values' => '',
@@ -64,6 +64,10 @@ class DBQueryHelper
         ];
 
         $this->params = $params;
+
+        $this->makeTable($this->params['table'] ?? '');
+
+        $this->makeSelect($data['select'] ?? []);
 
         if (!empty($data['as'])) {
             $this->queryData['table'] .= sprintf(' %s', $data['as']);
@@ -154,6 +158,22 @@ class DBQueryHelper
         }
 
         return $result;
+    }
+
+    protected function makeTable(string $table): self
+    {
+        $this->queryData['table'] = $table;
+
+        return $this;
+    }
+
+    protected function makeSelect(array $selectNames): self
+    {
+        $this->queryData['selectNames'] = !empty($selectNames)
+            ? implode(',', $selectNames)
+            : '*';
+
+        return $this;
     }
 
     protected function makeJoin(array $data): self
@@ -334,8 +354,8 @@ class DBQueryHelper
 
     protected function makeOrderBy(array $data): self
     {
-        foreach ($data['orderBy'] as $name => $value) {
-            $this->validator->check([$name => 'regexp/^(asc|desc)$/i'], $data['orderBy']);
+        foreach ($data as $name => $value) {
+            $this->validator->check([$name => 'regexp/^(asc|desc)$/i'], $data);
 
             if (!$this->validator->hasError()) {
                 $this->queryData['orderBy'] .= sprintf('%s %s, ', $name, $value);
@@ -356,7 +376,7 @@ class DBQueryHelper
             if (is_numeric($name)) {
                 $this->queryData['groupBy'] .= sprintf('%s, ', $value);
             } else {
-                $this->validator->check([$name => 'regexp/^(asc|desc)$/i'], $data['groupBy']);
+                $this->validator->check([$name => 'regexp/^(asc|desc)$/i'], $data);
                 
                 if (!$this->validator->hasError()) {
                     $this->queryData['groupBy'] .= sprintf('%s %s, ', $name, $value);
