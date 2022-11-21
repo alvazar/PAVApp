@@ -2,8 +2,9 @@
 namespace PAVApp\Storage;
 
 use App\Config\Storage as StorageConfig;
+use PAVApp\Interfaces\SingletonInterface;
 
-class MCStorage implements StorageInterface
+class MCStorage implements SingletonInterface
 {
     private static $instance = null;
 

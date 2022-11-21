@@ -1,7 +1,7 @@
 <?php
-namespace PAVApp\Storage;
+namespace PAVApp\Interfaces;
 
-interface StorageInterface
+interface SingletonInterface
 {
     public static function getInstance(): ?object;
 }

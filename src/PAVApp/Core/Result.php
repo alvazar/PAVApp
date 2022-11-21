@@ -1,24 +1,17 @@
 <?php
 namespace PAVApp\Core;
 
+use PAVApp\Traits\ErrorTrait;
+
 class Result implements ResultInterface
 {
-    protected $error = '';
-    protected $data = [];
+    use ErrorTrait;
 
-    public function setError(string $error): void
-    {
-        $this->error = $error;
-    }
+    protected $data = [];
 
     public function setData(array $data): void
     {
         $this->data = $data;
-    }
-
-    public function getError(): string
-    {
-        return $this->error;
     }
     
     public function getData(): array

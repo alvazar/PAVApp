@@ -2,9 +2,10 @@
 namespace PAVApp\Storage;
 
 use App\Config\Storage as StorageConfig;
+use PAVApp\Interfaces\SingletonInterface;
 
 // using "Singleton" pattern
-final class DBStorage implements StorageInterface
+final class DBStorage implements SingletonInterface
 {
     private static $instance = null;
     
