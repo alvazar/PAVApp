@@ -11,18 +11,37 @@ class DBQueryHelper
     /**
      * @var PAVApp\Core\Validator
      */
-    protected $validator;
+    protected Validator $validator;
 
-    protected $queryData;
+    /**
+     * @var array
+     */
+    protected array $queryData;
 
-    protected $params;
+    /**
+     * @var array
+     */
+    protected array $params;
 
-    protected $result;
+    /**
+     * @var array
+     */
+    protected array $result;
 
+    /**
+     */
     public function __construct()
     {
         $this->validator = new Validator();
 
+        $this->reset();
+    }
+
+    /**
+     * @return self
+     */
+    public function reset(): self
+    {
         // Части запроса.
         $this->queryData = [
             'table' => '',
@@ -45,6 +64,8 @@ class DBQueryHelper
             'types' => '',
             'errors' => []
         ];
+
+        return $this;
     }
 
     /**
@@ -63,6 +84,7 @@ class DBQueryHelper
             'update' => 'UPDATE {table} SET {updates} {where} {limit}',
         ];
 
+        $this->reset();
         $this->params = $params;
 
         $this->makeTable($this->params['table'] ?? '');
@@ -149,6 +171,12 @@ class DBQueryHelper
         return $this->result;
     }
 
+    /**
+     * @param array $data
+     * @param string $prefix
+     * 
+     * @return array
+     */
     protected function addPrefix (array $data, string $prefix): array
     {
         $result = [];
@@ -160,6 +188,11 @@ class DBQueryHelper
         return $result;
     }
 
+    /**
+     * @param string $table
+     * 
+     * @return self
+     */
     protected function makeTable(string $table): self
     {
         $this->queryData['table'] = $table;
@@ -167,6 +200,11 @@ class DBQueryHelper
         return $this;
     }
 
+    /**
+     * @param array $selectNames
+     * 
+     * @return self
+     */
     protected function makeSelect(array $selectNames): self
     {
         $this->queryData['selectNames'] = !empty($selectNames)
@@ -176,6 +214,11 @@ class DBQueryHelper
         return $this;
     }
 
+    /**
+     * @param array $data
+     * 
+     * @return self
+     */
     protected function makeJoin(array $data): self
     {
         foreach ($data as $modelName => $joinData) {
@@ -208,10 +251,13 @@ class DBQueryHelper
         return $this;
     }
 
+    /**
+     * @param array $data
+     * 
+     * @return self
+     */
     protected function makeFields(array $data): self
     {
-        $data = $data ?? [];
-            
         // Проверка полей
         if ($this->validator->check($this->params['fields'], $data)->hasError()) {
             return $this;
@@ -221,9 +267,9 @@ class DBQueryHelper
 
         foreach ($data as $name => $value) {
 
-            if (!empty($params['fields'][$name])) {
-                $result['values'][] = is_array($value) ? json_encode($value) : $value;
-                $result['types'] .= $type;
+            if (!empty($this->params['fields'][$name])) {
+                $this->result['values'][] = is_array($value) ? json_encode($value) : $value;
+                $this->result['types'] .= $type;
                 $this->queryData['insertNames'] .= sprintf('%s, ', $name);
                 $this->queryData['updates'] .= sprintf('%s = ?, ', $name);
                 $this->queryData['values'] .= '?, ';
@@ -239,6 +285,11 @@ class DBQueryHelper
         return $this;
     }
 
+    /**
+     * @param array $data
+     * 
+     * @return self
+     */
     protected function makeWhere(array $data): self
     {       
         if ($this->validator->check($this->params['where'], $data)->hasError()) {
@@ -352,6 +403,11 @@ class DBQueryHelper
         return $this;
     }
 
+    /**
+     * @param array $data
+     * 
+     * @return self
+     */
     protected function makeOrderBy(array $data): self
     {
         foreach ($data as $name => $value) {
@@ -369,6 +425,11 @@ class DBQueryHelper
         return $this;
     }
 
+    /**
+     * @param array $data
+     * 
+     * @return self
+     */
     protected function makeGroupBy(array $data): self
     {
         foreach ($data as $name => $value) {
@@ -391,6 +452,11 @@ class DBQueryHelper
         return $this;
     }
 
+    /**
+     * @param mixed $data
+     * 
+     * @return self
+     */
     protected function makeLimit($data): self
     {
         if (!is_array($data)) {
